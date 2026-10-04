@@ -180,11 +180,85 @@
       color: rgba(245, 210, 122, 0.8);
       opacity: 0.9;
     }
+
+    .map-container iframe {
+      display: block;
+      height: 220px;
+    }
+
+    /* ---------- Compu: dos columnas (en el celu no cambia nada) ---------- */
+    @media (min-width: 900px) {
+      body {
+        align-items: center;
+        padding: 40px;
+        background: radial-gradient(ellipse at top, #141414 0%, #000 70%);
+      }
+
+      .container {
+        max-width: 1080px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        padding: 48px;
+        text-align: left;
+      }
+
+      .col-main {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .col-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-left: 1px solid rgba(212, 175, 55, 0.25);
+        padding-left: 48px;
+      }
+
+      .col-info > .divider:first-child { display: none; }
+
+      .logo {
+        width: 220px;
+        height: 220px;
+      }
+
+      h1 { font-size: 2.6rem; }
+
+      .subtitle, .tagline { font-size: 1.05rem; }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 0;
+      }
+
+      .buttons .btn-primary { grid-column: 1 / -1; padding: 14px; font-size: 1.05rem; }
+
+      .info-block { font-size: 1rem; line-height: 1.6; margin-bottom: 14px; }
+
+      .section-title { font-size: 0.95rem; }
+
+      .map-container { margin-bottom: 0; }
+
+      .map-container iframe { height: 300px; }
+
+      .footer-note { text-align: center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .logo, .btn { animation: none; }
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
+
+   <div class="col-main">
 
     <div class="logo">
       <img src="SKALLOGO.jpeg" alt="Logo SKÅL">
@@ -224,6 +298,10 @@
 
     </div>
 
+   </div>
+
+   <div class="col-info">
+
     <div class="divider"></div>
 
     <div class="info-block">
@@ -247,8 +325,9 @@
     <div class="map-container">
       <iframe 
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.676067366696!2d-58.791676!3d-34.663676!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bc93d7c1b0c4a3%3A0x7a8f5e768f8b1a79!2sGral.%20Manuel%20Belgrano%20414%2C%20B1744%20Moreno%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1700000000000!5m2!1ses-419!2sar" 
-        width="100%" 
-        height="220" 
+        width="100%"
+        height="220"
+        title="Mapa de SKÅL en Moreno"
         style="border:1px solid #D4AF37; border-radius:12px;" 
         allowfullscreen="" 
         loading="lazy" 
@@ -259,6 +338,8 @@
     <p class="footer-note">
       Escaneá este código en tus llaveros, cartas o placas para ir directo a SKÅL.
     </p>
+
+   </div>
 
   </div>
 
@@ -282,6 +363,16 @@
 
       const rango = horarios[dia];
       const estado = document.getElementById("estado-local");
+
+      // Después de medianoche sigue valiendo el horario del día anterior (viernes y sábado cierran a la 01:00)
+      const anterior = horarios[(dia + 6) % 7];
+      if (anterior && anterior[1] > 1440 && totalMin <= anterior[1] - 1440) {
+        const quedan = anterior[1] - 1440 - totalMin;
+        estado.innerHTML = quedan <= 30
+          ? `<span class="status-open">Abierto (cierra pronto)</span>`
+          : `<span class="status-open">Abierto ahora</span>`;
+        return;
+      }
 
       if (!rango) {
         estado.innerHTML = `<span class="status-closed">Cerrado hoy</span>`;
